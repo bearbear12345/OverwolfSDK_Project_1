@@ -17,7 +17,7 @@ const table = {
   // Remove tracking id from list
   remove(id) {
     if (this.find(id)) {
-      this.data = table.data.filter(item => item.toString() !== id.toString())
+      this.data = table.data.filter(item => item != id)
       this.update();
     }
   },
@@ -59,25 +59,43 @@ function getJSON(url, success) {
   window[ud] = function(data) {
     head.removeChild(script);
     success && success(data);
+    
   };
   script.src = "http://anyorigin.com/go?url=" + escape(url) + '&callback=' + ud;
   head.appendChild(script);
 }
 
-function identifyID(id) {
-  try {
-    services.forEach(service => {
-      if (service.regex.test(id)) throw service
-    })
-  } catch (service) {
-    return service
-  }
+
+
+
+
+var tempSTATUS = {}
+const service =
+{
+
+// Get service data through regex match
+identify(id) {
+  return services.find(service => {
+    return service.regex.test(id)
+  });
+},
+
+// Get delivery status
+ check(id, service) {
+  service = service ? service : this.identify(id)
+  getJSON(service.request + id, resp => {tempSTATUS[id] = service.callback(resp)})
+}
 }
 
 
-function checkID(id, service) {
-}
+
+ 
+
+
+
+
 d = id => {
   table.remove(unescape(id))
 }
+
 table.update();
