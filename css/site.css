@@ -1,0 +1,71 @@
+@font-face {
+    font-family: 'CentraleSans';
+    src: url('../fonts/centralesansrndlight.eot');
+    src: url('../fonts/centralesansrndlight.woff') format('woff'), url('../fonts/centralesansrndlight.svg') format('svg');
+    font-weight: 300;
+    font-style: normal;
+}
+html {
+}
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  overflow: scroll;
+  overflow-x: hidden;
+}
+::-webkit-scrollbar {
+    background: transparent;  /* optional: just make scrollbar invisible */
+}
+/* optional: show position indicator in red */
+::-webkit-scrollbar-thumb {
+    background: #e8f0ff;
+}
+header:before {
+  font-family: "CentraleSans";
+  font-size: 45px;
+  content:"deliverytrack";
+}
+main {
+  padding-top: 30px;
+  flex: 1;
+}
+footer {
+z-index: -1;
+content:url("../images/footer-waves.svg");
+height: 100%;
+
+}
+
+#viewTable td:nth-child(3):before {
+content:"\2717";
+color: #bd8b9c;
+}
+#viewTable td:nth-child(3):hover {
+cursor: pointer;
+}
+
+#viewTable table {
+margin-bottom: 10px;
+}
+
+#viewTable input::placeholder {
+font-style: italic;
+color: #d1d1d1;
+}
+
+input[type='text']:focus {
+border-color: #bd8b9c;
+}
+
+/** { border: 1px solid red; }*/
+
+/* UTILITIES */
+.center {
+  width: 50%;
+  margin: 0 auto;
+}
+
+.textcenter {
+  text-align: center;
+}
