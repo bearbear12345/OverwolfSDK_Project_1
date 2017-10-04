@@ -1,7 +1,9 @@
-// 
-// Delivery Service Data
-//
-
+/*
+ * DeliveryTrack
+ * Copyright 2017 Andrew Wong <featherbear@navhaxs.au.eu.org>
+ *
+ * The following code is licensed under the MIT License
+ */
 var services = [
 {name: "Australia Post",
 regex: /.*/,
