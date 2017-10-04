@@ -11,16 +11,17 @@ body {
   display: flex;
   min-height: 100vh;
   flex-direction: column;
-  overflow: scroll;
-  overflow-x: hidden;
 }
+/*
+
 ::-webkit-scrollbar {
-    background: transparent;  /* optional: just make scrollbar invisible */
+    background: transparent;
 }
-/* optional: show position indicator in red */
 ::-webkit-scrollbar-thumb {
     background: #e8f0ff;
 }
+
+*/
 header:before {
   font-family: "CentraleSans";
   font-size: 45px;
