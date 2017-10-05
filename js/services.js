@@ -12,7 +12,7 @@ callback: f=>f.contents.QueryTrackEventsResponse.TrackingResults[0].ReturnMessag
 {
 name: "WINIT",
 regex: /.*/,
-request: ""
+request: "",
 callback: function(){}
 }
 ]
