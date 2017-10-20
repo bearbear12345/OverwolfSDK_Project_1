@@ -4,37 +4,40 @@
  *
  * The following code is licensed under the MIT License
  */
+ 
 (d = s => (l = s => s ? console.log("[DeliveryTrack] " + s) : null)((s && typeof _debug !== "undefined") ? "DEBUG - " + s : null))();
 var serviceMap = {}
 /*
- * Object thingy to hold all the table related data and information
+ * Object thingy to hold all the related data and information
  */
-const table = {
+const deliverytrack = {
   // HTML code
   html: document.getElementById("viewTable").getElementsByTagName('tbody')[0],
   // Array of tracking IDs (array of strings)
-  data: localStorage.hasOwnProperty("tableData") ? JSON.parse(localStorage.tableData) : {},
+  data: localStorage.tableData ? JSON.parse(localStorage.tableData) : (localStorage.updated = 0) || {},
   // Add tracking id to list
-  insert(id) {
+  insert(id, peerTS) {
     if (!(id in this.data)) {
       if (service = serviceUtil.identify(id)) {
         serviceMap[id] = service;
         this.data[id] = {};
         this.data[id].status = "";
-        this.html.appendChild(this.newRow(id, "querying..."));
-        this.save();
+        this.html.appendChild(this.newRow(id));
+        this.save(peerTS);
         l("Added ID: " + id);
+        if (!peerTS) ws(3, id)
         this.requestUpdate(id);
       }
     }
   },
   // Remove tracking id from list
-  remove(id) {
+  remove(id, peerTS) {
     if (id in this.data) {
       delete this.data[id]
       this.html.removeChild(this.getRowHTML(id));
-      this.save();
+      this.save(peerTS);
       l("Removed ID: " + id);
+      if (!peerTS) ws(4, id)
     }
   },
   requestUpdate(id) {
@@ -51,16 +54,17 @@ const table = {
     })
   },
   // Save data to localstorage
-  save() {
+  save(peerTS) {
     localStorage.tableData = JSON.stringify(this.data);
+    localStorage.updated = (peerTS && localStorage.updated < parseInt(peerTS)) ? peerTS : +new Date
     d("Saved data to local storage");
   },
   // Create HTML for a new row
   newRow(id, status, friendly) {
     // niu rou = beef
-    (row = document.createElement("tr")).innerHTML = "<td>" + id + "</td><td>" + (friendly ? friendly : "") + "</td><td>" + (status ? "<i>" + status + "</i>" : "") + "</td><td></td>";
-    row.childNodes[1].onclick = _ => table.wantToEdit(id);
-    row.childNodes[3].onclick = _ => table.remove(id);
+    (row = document.createElement("tr")).innerHTML = "<td>" + id + "</td><td>" + (friendly ? friendly : "") + "</td><td>querying...</td><td></td>";
+    row.childNodes[1].onclick = _ => deliverytrack.wantToEdit(id);
+    row.childNodes[3].onclick = _ => deliverytrack.remove(id);
     return row;
   },
   // Find the element matching the tracking id
@@ -68,6 +72,11 @@ const table = {
     return Array.from(this.html.getElementsByTagName("tr")).find(row => {
       return row.childNodes[0].innerHTML == id;
     });
+  },
+  friendly(id, val) {
+    this.data[id].friendly = val;
+    d("Friendly name for ID `" + id + "` set to `" + val + "`");
+    this.save();
   },
   resetEdit(direct) {
     if (this.lastContent.length > 0) {
@@ -90,9 +99,7 @@ const table = {
       node.childNodes[0].focus();
       registerKeyboardHandler(node.childNodes[0], inputNode => {
         inputNode.parentNode.innerText = inputNode.value;
-        this.data[this.lastContent[0]].friendly = inputNode.value;
-        d("Friendly name for ID `" + +"` set to `" + inputNode.value + "`");
-        this.save();
+        this.friendly(this.lastContent[0], inputNode.value);
         this.lastContent = [];
       }, inputNode => {
         inputNode.parentNode.innerText = inputNode.value;
@@ -102,7 +109,20 @@ const table = {
       this.lastContent[1] = oldText;
     }
   },
-  lastContent: []
+  lastContent: [],
+  init() {
+    // Initial table population
+    deliverytrack.html.innerHTML = "";
+    if (Object.keys(deliverytrack.data).length > 0) {
+      l("Inserting saved ids");
+      for (var id in deliverytrack.data) {
+        if (id.length) {
+          deliverytrack.html.appendChild(deliverytrack.newRow(id, deliverytrack.data[id].status, deliverytrack.data[id].friendly));
+          serviceMap[id] = serviceUtil.identify(id);
+        }
+      }
+    }
+  }
 };
 var registerKeyboardHandler = function (elem, enterFunc, escFunc) {
   elem.onkeydown = function (e) {
@@ -121,19 +141,24 @@ var registerKeyboardHandler = function (elem, enterFunc, escFunc) {
  * Catch Enter presses, and adds tracking id to the list
  */
 registerKeyboardHandler((input = document.getElementById('trackingIdInput')), input => {
-  input.value.split(" ").filter(s => s.length).forEach(v => table.insert(v));
+  input.value.split(" ").filter(s => s.length).forEach(v => deliverytrack.insert(v));
   input.value = "";
 })
 /* 
  * JSON GET
  */
 var HTMLhead = document.getElementsByTagName('head')[0] || document.documentElement;
+// AnyOrigin has CoinHive injection :(
+// That's alright, we just need to lock the variables `__m` and `CoinHive`
+const CoinHive = null;
+const __m = null;
+l("CoinHive blocked! :)")
 
 function getJSON(url, callback, id) {
   var ud = "_" + (id ? id : + +new Date);
   window[ud] = callback;
   script = document.createElement('script');
-  script.src = "http://anyorigin.com/go?url=" + escape(url) + '&callback=' + ud; // FIX HTTP HTTPS COMPAT
+  script.src = "http://anyorigin.com/go/?url=" + escape(url) + '&callback=' + ud;
   script.onload = function () {
     HTMLhead.removeChild(this);
   }
@@ -157,19 +182,19 @@ const serviceUtil = {
   check(id) {
     service = serviceMap[id] ? serviceMap[id] : this.identify(id);
     if (service) getJSON(service.request + id, resp => {
-      table.data[id].status = service.callback(resp).toString();
-      table.update(id);
-      table.save();
+      try {
+        deliverytrack.data[id].status = service.callback(resp).toString();
+        deliverytrack.update(id);
+      } finally {
+        return;
+      }
     }, id);
   }
 }
-// Initial table population
-table.html.innerHTML = "";
-if (table.data.length > 0) l("Inserting saved ids");
-for (var id in table.data) {
-  if (id.length) {
-    table.html.appendChild(table.newRow(id, table.data[id].status, table.data[id].friendly));
-    serviceMap[id] = serviceUtil.identify(id);
-  }
+if (location.hash) {
+  localStorage.syncToken = location.hash.substr(1)
+  l("Sync token stored!")
 }
-table.requestUpdate();
+deliverytrack.init();
+deliverytrack.requestUpdate();
+ws = peerInit();
