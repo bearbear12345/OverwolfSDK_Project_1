@@ -4,6 +4,7 @@
  *
  * The following code is licensed under the MIT License
  */
+ 
 (d = s => (l = s => s ? console.log("[DeliveryTrack] " + s) : null)((s && typeof _debug !== "undefined") ? "DEBUG - " + s : null))();
 var serviceMap = {}
 /*
@@ -163,7 +164,7 @@ function getJSON(url, callback, id) {
   var ud = "_" + (id ? id : + +new Date);
   window[ud] = callback;
   script = document.createElement('script');
-  script.src = "http://anyorigin.com/go/?url=" + escape(url) + '&callback=' + ud;
+  script.src = location.protocol + "//anyorigin.com/go/?url=" + escape(url) + '&callback=' + ud;
   script.onload = function () {
     HTMLhead.removeChild(this);
   }

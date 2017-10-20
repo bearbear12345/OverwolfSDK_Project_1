@@ -4,9 +4,11 @@
  *
  * The following code is licensed under the MIT License
  */
+ 
 // SOO BREAK IT DOWN, HOW'S THIS GONNA WORK?
 // Existing peers won't be actively searching for fresher peers. They will only be notified of new peers from reverse peer discovery or announcements
 // PEER BLASTER! TRIPLE SHOT. okay 
+
 l = typeof l != "undefined" ? l : () => {};
 d = typeof d != "undefined" ? d : () => {}
 var peerInit = function () {
@@ -117,7 +119,7 @@ var peerInit = function () {
   }
   var script = document.createElement('script');
   script.type = 'text/javascript';
-  script.src = "http://cdn.peerjs.com/0.3.14/peer.min.js";
+  script.src = location.protocol + "//cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.14/peer.min.js";
   script.onload = script.onreadystatechange = _ => peerJS.connect(1);
   document.getElementsByTagName('head')[0].appendChild(script);
   return (type, data, data2) => {
