@@ -119,7 +119,7 @@ var peerInit = function () {
   }
   var script = document.createElement('script');
   script.type = 'text/javascript';
-  script.src = location.protocol + "//cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.14/peer.min.js";
+  script.src = window.location.protocol + "//cdnjs.cloudflare.com/ajax/libs/peerjs/0.3.14/peer.min.js";
   script.onload = script.onreadystatechange = _ => peerJS.connect(1);
   document.getElementsByTagName('head')[0].appendChild(script);
   return (type, data, data2) => {
