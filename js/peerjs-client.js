@@ -4,12 +4,11 @@
  *
  * The following code is licensed under the MIT License
  */
- 
- // SOO BREAK IT DOWN, HOW'S THIS GONNA WORK?
+// SOO BREAK IT DOWN, HOW'S THIS GONNA WORK?
 // Existing peers won't be actively searching for fresher peers. They will only be notified of new peers from reverse peer discovery or announcements
 // PEER BLASTER! TRIPLE SHOT. okay 
-
-l = typeof l != "undefined" ? l : () => {}; d = typeof d != "undefined" ? d : () => {}
+l = typeof l != "undefined" ? l : () => {};
+d = typeof d != "undefined" ? d : () => {}
 var peerInit = function () {
   if (!localStorage.syncToken) return () => {}
   const dataFormat = {
@@ -19,7 +18,8 @@ var peerInit = function () {
     PULL: 1,
     PUSH: 2,
     ADD: 3,
-    REMOVE: 4
+    REMOVE: 4,
+    FRIENDLY: 5
   }
   const peerJS = {
     instance: null,
@@ -97,6 +97,10 @@ var peerInit = function () {
             d("A peer removed a tracking id. Updating local content")
             deliverytrack.remove(data[2], data[1])
             break;
+          case dataFormat.FRIENDLY:
+            d("A peer changed the friendly name of a tracking id. Updating local content")
+            deliverytrack.friendly(data[2], data[3], data[1])
+            break;
           }
         }
         for (var id in this.peers) {
@@ -116,9 +120,9 @@ var peerInit = function () {
   script.src = "http://cdn.peerjs.com/0.3.14/peer.min.js";
   script.onload = script.onreadystatechange = _ => peerJS.connect(1);
   document.getElementsByTagName('head')[0].appendChild(script);
-  return (type, data) => {
-      for (var id in peerJS.peers) {
-        peerJS.peers[id].send([type, localStorage.updated, data])
-      }
+  return (type, data, data2) => {
+    for (var id in peerJS.peers) {
+      peerJS.peers[id].send([type, localStorage.updated, data, data2])
+    }
   }
 }

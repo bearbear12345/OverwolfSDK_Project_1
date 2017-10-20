@@ -4,7 +4,6 @@
  *
  * The following code is licensed under the MIT License
  */
- 
 (d = s => (l = s => s ? console.log("[DeliveryTrack] " + s) : null)((s && typeof _debug !== "undefined") ? "DEBUG - " + s : null))();
 var serviceMap = {}
 /*
@@ -73,12 +72,16 @@ const deliverytrack = {
       return row.childNodes[0].innerHTML == id;
     });
   },
-  friendly(id, val) {
+  friendly(id, val, peerTS) {
     this.data[id].friendly = val;
+    this.save(peerTS);
     d("Friendly name for ID `" + id + "` set to `" + val + "`");
-    this.save();
+    if (!peerTS) ws(5, id, val);
+    else if (this.lastContent[0] == id)
+      this.lastContent[1] = val;
+    else this.getRowHTML(id).childNodes[1].innerText = val;
   },
-  resetEdit(direct) {
+  resetEdit() {
     if (this.lastContent.length > 0) {
       try {
         (this.getRowHTML(this.lastContent[0]).childNodes[1].innerText = this.lastContent[1]);
@@ -98,11 +101,13 @@ const deliverytrack = {
       node.childNodes[0].value = oldText;
       node.childNodes[0].focus();
       registerKeyboardHandler(node.childNodes[0], inputNode => {
-        inputNode.parentNode.innerText = inputNode.value;
-        this.friendly(this.lastContent[0], inputNode.value);
+        var newFriendly = inputNode.value.trim()
+        var changed = this.lastContent[1] != newFriendly
+        inputNode.parentNode.innerText = changed ? newFriendly : this.lastContent[1]
+        if (changed) this.friendly(this.lastContent[0], newFriendly);
         this.lastContent = [];
       }, inputNode => {
-        inputNode.parentNode.innerText = inputNode.value;
+        inputNode.parentNode.innerText = this.lastContent[1];
         this.lastContent = [];
       })
       this.lastContent[0] = id;
