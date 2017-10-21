@@ -43,7 +43,7 @@ const deliverytrack = {
     }
   },
   requestUpdate(id) {
-    ids = id ? [id] : Object.keys(this.data);
+    ids = id ? [id] : Object.keys(deliverytrack.data);
     d("Updated requested for the ID(s): " + ids.join(", "))
     ids.forEach(id => serviceUtil.check(id));
   },
@@ -129,6 +129,7 @@ const deliverytrack = {
           serviceMap[id] = serviceUtil.identify(id);
         }
       }
+      this.requestUpdate();
     }
   }
 };
@@ -204,5 +205,4 @@ if (location.hash) {
   l("Sync token stored!")
 }
 deliverytrack.init();
-deliverytrack.requestUpdate();
 ws = peerInit();
