@@ -5,6 +5,8 @@
  * The following code is licensed under the MIT License
  */
  
+ if (window.location.protocol == "https:") window.location.protocol = "http:";
+ 
 (d = s => (l = s => s ? console.log("[DeliveryTrack] " + s) : null)((s && typeof _debug !== "undefined") ? "DEBUG - " + s : null))();
 var serviceMap = {}
 /*
