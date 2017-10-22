@@ -105,7 +105,7 @@ var peerInit = function () {
             break;
           }
         }
-        Object.keys(this.peers).concat(id_prefix + (id + 1)).forEach(newPeer)
+        Object.keys(this.peers).concat(this.id_prefix + (id + 1)).forEach(newPeer)
         this.instance.on('connection', conn => {
           if (conn.metadata == "deliverytrack") {
             this.peers[conn.peer] = conn
