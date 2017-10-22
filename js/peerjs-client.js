@@ -11,6 +11,7 @@
 
 l = typeof l != "undefined" ? l : () => {};
 d = typeof d != "undefined" ? d : () => {}
+
 var peerInit = function () {
   if (!localStorage.syncToken) return () => {}
   const dataFormat = {
@@ -28,16 +29,16 @@ var peerInit = function () {
     peers: {},
     id_prefix: "DT",
     id: "",
-    connect(id) {
-      d("Trying for ID: " + this.id_prefix + id);
-      this.instance = new Peer(this.id_prefix + id, {
+    connect(idN) {
+      d("Trying for ID: " + this.id_prefix + idN);
+      this.instance = new Peer(this.id_prefix + idN, {
         key: localStorage.syncToken
       });
       this.instance.on('error', err => {
         if (err.type == "unavailable-id") {
-          d("ID `" + this.id_prefix + id + "` unavailable")
-          this.peers[this.id_prefix + id] = undefined;
-          this.connect(id + 1);
+          d("ID `" + this.id_prefix + idN + "` unavailable")
+          this.peers[this.id_prefix + idN] = undefined;
+          this.connect(idN + 1);
         }
       });
       this.instance.on('open', id => {
@@ -46,6 +47,7 @@ var peerInit = function () {
         d("Claimed ID: " + id);
         d(Object.keys(this.peers).length > 0 ? "Other peers (logically deduced): " + Object.keys(this.peers).join(", ") : "No other peers available");
         var newPeer = id => {
+          d("Contacting peer: " + id);
           this.peers[id] = this.instance.connect(id, {
             metadata: "deliverytrack"
           })
@@ -105,7 +107,7 @@ var peerInit = function () {
             break;
           }
         }
-        Object.keys(this.peers).concat(this.id_prefix + (id + 1)).forEach(newPeer)
+        Object.keys(this.peers).concat(this.id_prefix + (idN + 1)).forEach(newPeer)
         this.instance.on('connection', conn => {
           if (conn.metadata == "deliverytrack") {
             this.peers[conn.peer] = conn
