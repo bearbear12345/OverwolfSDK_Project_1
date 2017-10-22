@@ -4,14 +4,13 @@
  *
  * The following code is licensed under the MIT License
  */
- 
+
 // SOO BREAK IT DOWN, HOW'S THIS GONNA WORK?
 // Existing peers won't be actively searching for fresher peers. They will only be notified of new peers from reverse peer discovery or announcements, as well as the initial discovery
 // PEER BLASTER! TRIPLE SHOT. okay 
 
 l = typeof l != "undefined" ? l : () => {};
 d = typeof d != "undefined" ? d : () => {}
-
 var peerInit = function () {
   if (!localStorage.syncToken) return () => {}
   const dataFormat = {
@@ -37,32 +36,33 @@ var peerInit = function () {
       this.instance.on('error', err => {
         if (err.type == "unavailable-id") {
           d("ID `" + this.id_prefix + idN + "` unavailable")
-          this.peers[this.id_prefix + idN] = undefined;
           this.connect(idN + 1);
         }
       });
       this.instance.on('open', id => {
-        this.id = id,
-          l("Connected to peer network as " + id)
+        this.id = id;
+        l("Connected to peer network as " + id);
         d("Claimed ID: " + id);
         d(Object.keys(this.peers).length > 0 ? "Other peers (logically deduced): " + Object.keys(this.peers).join(", ") : "No other peers available");
         var newPeer = id => {
-          d("Contacting peer: " + id);
-          this.peers[id] = this.instance.connect(id, {
-            metadata: "deliverytrack"
-          })
-          this.peers[id].on('open', function () {
-            this.on("data", data => receiveHandler(data, this))
-            d("Greeting " + this.peer)
-            this.send([dataFormat.HELLO, localStorage.updated])
-          })
+          if (id != this.id) {
+            d("Contacting peer: " + id);
+            this.peers[id] = this.instance.connect(id, {
+              metadata: "deliverytrack"
+            })
+            this.peers[id].on('open', function () {
+              this.on("data", data => receiveHandler(data, this))
+              l("Connected to peer: " + this.peer)
+              this.send([dataFormat.HELLO, localStorage.updated])
+            })
+          }
         }
         var receiveHandler = (data, conn) => {
           switch (data[0]) {
           case dataFormat.HELLO:
-            l("New peer: " + conn.peer)
+            l("Connected to peer: " + conn.peer)
             this.peers[conn.peer] = conn;
-            conn.send([dataFormat.PEERS, Object.keys(this.peers)])
+            conn.send([dataFormat.PEERS, Object.keys(this.peers).filter(id => this.peers[id].open)])
             if (parseInt(data[1]) < parseInt(localStorage.updated)) {
               l("Notifying peer " + conn.peer + " of newer version")
               conn.send([dataFormat.VER, localStorage.updated]);
@@ -107,7 +107,7 @@ var peerInit = function () {
             break;
           }
         }
-        Object.keys(this.peers).concat(this.id_prefix + (idN + 1)).forEach(newPeer)
+        for (var i = 1; i < idN + 2; i++) newPeer(this.id_prefix + i);
         this.instance.on('connection', conn => {
           if (conn.metadata == "deliverytrack") {
             this.peers[conn.peer] = conn
