@@ -6,7 +6,7 @@
  */
  
 // SOO BREAK IT DOWN, HOW'S THIS GONNA WORK?
-// Existing peers won't be actively searching for fresher peers. They will only be notified of new peers from reverse peer discovery or announcements
+// Existing peers won't be actively searching for fresher peers. They will only be notified of new peers from reverse peer discovery or announcements, as well as the initial discovery
 // PEER BLASTER! TRIPLE SHOT. okay 
 
 l = typeof l != "undefined" ? l : () => {};
@@ -105,9 +105,7 @@ var peerInit = function () {
             break;
           }
         }
-        for (var id in this.peers) {
-          newPeer(id)
-        }
+        Object.keys(this.peers).concat(id_prefix + (id + 1)).forEach(newPeer)
         this.instance.on('connection', conn => {
           if (conn.metadata == "deliverytrack") {
             this.peers[conn.peer] = conn
