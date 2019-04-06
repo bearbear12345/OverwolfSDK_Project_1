@@ -167,7 +167,7 @@ function getJSON(url, callback, id) {
   var ud = "_" + (id ? id : + +new Date);
   window[ud] = callback;
   script = document.createElement('script');
-  script.src = window.location.protocol + "//anyorigin.com/go/?url=" + escape(url) + '&callback=' + ud;
+  script.src = window.location.protocol + "//whateverorigin.org/get?url=" + escape(url).replace("/","%2F") + '&callback=' + ud;
   script.onload = function () {
     HTMLhead.removeChild(this);
   }
